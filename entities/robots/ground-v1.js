@@ -1,12 +1,23 @@
-const {BrushedMotor} = require('./motors');
+const {BrushedMotor} = require('../motors');
 
-class Ground1Model {
+class GroundV1Robot {
   constructor(params = {}) {
     const onChange = callOnChange.bind(this);
     this.rightMotor = new BrushedMotor({onChange});
     this.leftMotor = new BrushedMotor({onChange});
 
     this.onChange = params.onChange;
+  }
+
+  setOnChange(onChange) {
+    this.onChange = onChange;
+    this.rightMotor.setOnChange(callOnChange.bind(this));
+    this.leftMotor.setOnChange(callOnChange.bind(this));
+  }
+
+  stop() {
+    this.rightMotor.stop();
+    this.leftMotor.stop();
   }
 
   toJSON() {
@@ -23,4 +34,4 @@ function callOnChange() {
   this.onChange(args);
 }
 
-module.exports = Ground1Model;
+module.exports = GroundV1Robot;

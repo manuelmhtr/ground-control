@@ -6,19 +6,22 @@ const SPEED_STOP = 0;
 class BrushedMotor {
   constructor(params = {}) {
     this.speed = 0;
-
     this.onChange = params.onChange;
   }
 
-  setSpeed(newSpeed) {
-    assert(newSpeed >= SPEED.MIN, `speed must be higher than ${SPEED.MIN}`);
-    assert(newSpeed <= SPEED.MAX, `speed must be lower than ${SPEED.MAX}`);
-    this.speed = newSpeed;
+  setOnChange(onChange) {
+    this.onChange = onChange;
+  }
+
+  setSpeed(speed) {
+    assert(speed >= SPEED.MIN, `speed must be higher than ${SPEED.MIN}`);
+    assert(speed <= SPEED.MAX, `speed must be lower than ${SPEED.MAX}`);
+    this.speed = speed;
     callOnChange.call(this);
   }
 
-  addSpeed(incr) {
-    const newSpeed = Math.max(Math.min(this.speed + incr, SPEED.MAX), SPEED.MIN);
+  incrementSpeed(increment) {
+    const newSpeed = Math.max(Math.min(this.speed + increment, SPEED.MAX), SPEED.MIN);
     this.setSpeed(newSpeed);
   }
 
