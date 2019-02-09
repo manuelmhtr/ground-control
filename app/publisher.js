@@ -9,9 +9,9 @@ class Publisher {
     this.publishers = publishers;
   }
 
-  publish(data) {
+  publish(event, data) {
     this.publishers.forEach(publisher => {
-      publisher.publish(data);
+      publisher.publish(event, data);
     });
   }
 }

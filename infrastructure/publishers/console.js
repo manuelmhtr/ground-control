@@ -1,8 +1,8 @@
 class ConsolePublisher {
   constructor() {}
 
-  publish(data) {
-    const outout = JSON.stringify(data, null, 2);
+  publish(params) {
+    const outout = JSON.stringify(params, null, 2);
     console.log(outout);
   }
 }

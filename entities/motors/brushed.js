@@ -1,23 +1,25 @@
 const assert = require('assert');
 
+const MOTOR_EVENTS = require('../../entities/events/motor');
 const SPEED = { MIN: -100, MAX: 100 };
 const SPEED_STOP = 0;
 
 class BrushedMotor {
-  constructor(params = {}) {
+  constructor() {
     this.speed = 0;
-    this.onChange = params.onChange;
+    this.events = {};
   }
 
-  setOnChange(onChange) {
-    this.onChange = onChange;
+  on(event, callback) {
+    assert(event, 'event name required');
+    this.events[event] = callback;
   }
 
   setSpeed(speed) {
     assert(speed >= SPEED.MIN, `speed must be higher than ${SPEED.MIN}`);
     assert(speed <= SPEED.MAX, `speed must be lower than ${SPEED.MAX}`);
     this.speed = speed;
-    callOnChange.call(this);
+    launchEvent.call(this, MOTOR_EVENTS.CHANGED_SPEED, this.toJSON());
   }
 
   incrementSpeed(increment) {
@@ -36,10 +38,9 @@ class BrushedMotor {
   }
 }
 
-function callOnChange() {
-  if (!this.onChange) return;
-  const args = this.toJSON();
-  this.onChange(args);
+function launchEvent(event, params) {
+  const cb = this.events[event];
+  if (cb) cb(params);
 }
 
 module.exports = BrushedMotor;

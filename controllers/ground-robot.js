@@ -1,6 +1,8 @@
 const assert = require('assert');
 
-const INPUT_EVENTS = require('../entities/enums/input-events');
+const INPUT_COMMANDS = require('../entities/commands/input');
+const REMOTE_COMMANDS = require('../entities/commands/remote');
+const ROBOT_EVENTS = require('../entities/events/robot');
 
 class GroundRobotController {
   constructor(params = {}) {
@@ -16,26 +18,33 @@ class GroundRobotController {
   }
 
   start() {
-    const onChange = data => this.publisher.publish(data);
-
-    this.inputHandler.on(INPUT_EVENTS.INCREMENT_SPEED, ({motor, increment}) => {
-      console.log(INPUT_EVENTS.INCREMENT_SPEED, {motor, increment});
-      if (motor === 'right') this.robot.rightMotor.incrementSpeed(increment);
-      if (motor === 'left') this.robot.leftMotor.incrementSpeed(increment);
-    });
-
-    this.inputHandler.on(INPUT_EVENTS.SET_SPEED, ({motor, speed}) => {
-      console.log(INPUT_EVENTS.SET_SPEED, {motor, speed});
-      if (motor === 'right') this.robot.rightMotor.setSpeed(speed);
-      if (motor === 'left') this.robot.leftMotor.setSpeed(speed);
-    });
-
-    this.inputHandler.on(INPUT_EVENTS.STOP, () => {
-      this.robot.stop();
-    });
-
-    this.robot.setOnChange(onChange);
+    bindInputHandlerEvents.call(this);
+    bindRobotEvents.call(this);
   }
+}
+
+function bindInputHandlerEvents() {
+  this.inputHandler.on(INPUT_COMMANDS.INCREMENT_SPEED, ({motor, increment}) => {
+    if (motor === 'right') this.robot.rightMotor.incrementSpeed(increment);
+    if (motor === 'left') this.robot.leftMotor.incrementSpeed(increment);
+  });
+
+  this.inputHandler.on(INPUT_COMMANDS.SET_SPEED, ({motor, speed}) => {
+    if (motor === 'right') this.robot.rightMotor.setSpeed(speed);
+    if (motor === 'left') this.robot.leftMotor.setSpeed(speed);
+  });
+
+  this.inputHandler.on(INPUT_COMMANDS.STOP, () => {
+    this.robot.stop();
+  });
+}
+
+function bindRobotEvents() {
+  this.robot.on(ROBOT_EVENTS.CHANGED_MOTOR_SPEED, data => {
+    const channel = this.robot.id;
+    const message = REMOTE_COMMANDS.SET_SPEED;
+    this.publisher.publish({channel, message, data});
+  });
 }
 
 module.exports = GroundRobotController;

@@ -1,3 +1,4 @@
 module.exports = {
-  ConsolePublisher: require('./console')
+  ConsolePublisher: require('./console'),
+  PubnubPublisher: require('./pubnub')
 };
