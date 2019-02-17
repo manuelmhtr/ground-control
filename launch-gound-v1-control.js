@@ -1,5 +1,5 @@
 const {ConsolePublisher, PubnubPublisher} = require('./infrastructure/publishers');
-const {KeyboardInputHandler} = require('./infrastructure/input-handlers');
+const {KeyboardInputHandler, PS3ControllerInputHandler} = require('./infrastructure/input-handlers');
 const Publisher = require('./app/publisher');
 const InputHandler = require('./app/input-handler');
 const GroundRobotController = require('./controllers/ground-robot');
@@ -34,7 +34,8 @@ function getPublisher() {
 
 function getInputHandler() {
   const inputHandlers = [
-    new KeyboardInputHandler()
+    new KeyboardInputHandler(),
+    new PS3ControllerInputHandler()
   ];
   return new InputHandler({inputHandlers});
 }

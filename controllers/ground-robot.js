@@ -1,8 +1,12 @@
 const assert = require('assert');
+const {debounce} = require('lodash');
 
 const INPUT_COMMANDS = require('../entities/commands/input');
 const REMOTE_COMMANDS = require('../entities/commands/remote');
 const ROBOT_EVENTS = require('../entities/events/robot');
+const MOTOR_NAMES = require('../entities/enums/motor-names');
+const DEBOUNCE_TIME = 100;
+const MAX_DEBOUNCE_WAIT = 500;
 
 class GroundRobotController {
   constructor(params = {}) {
@@ -40,10 +44,21 @@ function bindInputHandlerEvents() {
 }
 
 function bindRobotEvents() {
-  this.robot.on(ROBOT_EVENTS.CHANGED_MOTOR_SPEED, data => {
-    const channel = this.robot.id;
-    const message = REMOTE_COMMANDS.SET_SPEED;
-    this.publisher.publish({channel, message, data});
+  const channel = this.robot.id;
+  const message = REMOTE_COMMANDS.SET_SPEED;
+  const debounceOptions = { maxWait: MAX_DEBOUNCE_WAIT };
+
+  const publishRightMotorChange = debounce((...args) => this.publisher.publish(...args), DEBOUNCE_TIME, debounceOptions);
+  const publishLeftMotorChange = debounce((...args) => this.publisher.publish(...args), DEBOUNCE_TIME, debounceOptions);
+
+  this.robot.on(ROBOT_EVENTS.CHANGED_RIGHT_MOTOR_SPEED, params => {
+    const data = {...params, motor: MOTOR_NAMES.RIGHT};
+    publishRightMotorChange({channel, message, data});
+  });
+
+  this.robot.on(ROBOT_EVENTS.CHANGED_LEFT_MOTOR_SPEED, params => {
+    const data = {...params, motor: MOTOR_NAMES.LEFT};
+    publishLeftMotorChange({channel, message, data});
   });
 }
 

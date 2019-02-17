@@ -3,8 +3,6 @@ const {BrushedMotor} = require('../motors');
 
 const MOTOR_EVENTS = require('../../entities/events/motor');
 const ROBOT_EVENTS = require('../../entities/events/robot');
-const RIGHT_MOTOR_NAME = 'right';
-const LEFT_MOTOR_NAME = 'left';
 
 class GroundV1Robot {
   constructor(params = {}) {
@@ -37,17 +35,11 @@ class GroundV1Robot {
 
 function bindEvents() {
   this.rightMotor.on(MOTOR_EVENTS.CHANGED_SPEED, (data) => {
-    launchEvent.call(this, ROBOT_EVENTS.CHANGED_MOTOR_SPEED, {
-      ...data,
-      motor: RIGHT_MOTOR_NAME
-    });
+    launchEvent.call(this, ROBOT_EVENTS.CHANGED_RIGHT_MOTOR_SPEED, data);
   });
 
   this.leftMotor.on(MOTOR_EVENTS.CHANGED_SPEED, (data) => {
-    launchEvent.call(this, ROBOT_EVENTS.CHANGED_MOTOR_SPEED, {
-      ...data,
-      motor: LEFT_MOTOR_NAME
-    });
+    launchEvent.call(this, ROBOT_EVENTS.CHANGED_LEFT_MOTOR_SPEED, data);
   });
 }
 

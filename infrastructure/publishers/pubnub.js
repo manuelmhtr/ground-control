@@ -4,11 +4,12 @@ class PubnubPublisher {
   }
 
   publish(args) {
-    const params = {
-      channel: args.channel,
-      message: args.message,
-      meta: args.data
+    const {channel} = args;
+    const message = {
+      command: args.message,
+      data: args.data
     };
+    const params = { channel, message };
     this.pubnub.publish(params, response => {
       if (response.error) console.error(response);
     });
