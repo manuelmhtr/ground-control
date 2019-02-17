@@ -18,6 +18,7 @@ class PS3ControllerInputHandler {
   constructor() {
     this.events = {};
     this.device = getPS3Device();
+    if (!this.device) return console.error('PS3 controller not connected');
     this.controller = new HID.HID(this.device.path);
     this.values = {right: 0, left: 0};
     this.__launchHandler();

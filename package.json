@@ -1,15 +1,14 @@
 {
   "private": true,
   "name": "ground-control",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.2.0",
+  "description": "Application that connects to a robot using sockets, with the objective of tracking it and sending commands.",
   "main": "launch-gound-v1-control.js",
   "scripts": {
     "start": "node ./launch-gound-v1-control.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Manuel de la Torre",
   "dependencies": {
     "dotenv": "^6.2.0",
     "lodash": "^4.17.11",

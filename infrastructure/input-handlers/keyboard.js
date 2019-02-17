@@ -27,12 +27,13 @@ function launchHandler() {
   stdin.setEncoding('utf8');
 
   stdin.on('data', (key) => {
-    if (key === '\u0003') process.exit();
-    if (key === 'k') launchEvent(INPUT_COMMANDS.INCREMENT_SPEED, {motor: 'right', increment: SPEED_INCREMENT});
-    if (key === 'm') launchEvent(INPUT_COMMANDS.INCREMENT_SPEED, {motor: 'right', increment: -1 * SPEED_INCREMENT});
-    if (key === 'a') launchEvent(INPUT_COMMANDS.INCREMENT_SPEED, {motor: 'left', increment: SPEED_INCREMENT});
-    if (key === 'z') launchEvent(INPUT_COMMANDS.INCREMENT_SPEED, {motor: 'left', increment: -1 * SPEED_INCREMENT});
-    if (key === ' ') launchEvent(INPUT_COMMANDS.STOP);
+    const cmd = key.toLowerCase();
+    if (cmd === '\u0003') process.exit();
+    if (cmd === 'k') launchEvent(INPUT_COMMANDS.INCREMENT_SPEED, {motor: 'right', increment: SPEED_INCREMENT});
+    if (cmd === 'm') launchEvent(INPUT_COMMANDS.INCREMENT_SPEED, {motor: 'right', increment: -1 * SPEED_INCREMENT});
+    if (cmd === 'a') launchEvent(INPUT_COMMANDS.INCREMENT_SPEED, {motor: 'left', increment: SPEED_INCREMENT});
+    if (cmd === 'z') launchEvent(INPUT_COMMANDS.INCREMENT_SPEED, {motor: 'left', increment: -1 * SPEED_INCREMENT});
+    if (cmd === ' ') launchEvent(INPUT_COMMANDS.STOP);
   });
 }
 
