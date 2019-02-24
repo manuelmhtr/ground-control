@@ -10,14 +10,21 @@ const MAX_DEBOUNCE_WAIT = 500;
 
 class GroundRobotController {
   constructor(params = {}) {
-    const {robot, publisher, inputHandler} = params;
+    const {
+      robot,
+      commandsPublisher,
+      statusPublisher,
+      inputHandler
+    } = params;
 
     assert(robot, 'robot is required');
-    assert(publisher, 'publisher is required');
+    assert(commandsPublisher, 'commandsPublisher is required');
+    assert(statusPublisher, 'statusPublisher is required');
     assert(inputHandler, 'inputHandler is required');
 
     this.robot = robot;
-    this.publisher = publisher;
+    this.commandsPublisher = commandsPublisher;
+    this.statusPublisher = statusPublisher;
     this.inputHandler = inputHandler;
   }
 
@@ -48,17 +55,20 @@ function bindRobotEvents() {
   const message = REMOTE_COMMANDS.SET_SPEED;
   const debounceOptions = { maxWait: MAX_DEBOUNCE_WAIT };
 
-  const publishRightMotorChange = debounce((...args) => this.publisher.publish(...args), DEBOUNCE_TIME, debounceOptions);
-  const publishLeftMotorChange = debounce((...args) => this.publisher.publish(...args), DEBOUNCE_TIME, debounceOptions);
+  const publishRightMotorChange = debounce((...args) => this.commandsPublisher.publish(...args), DEBOUNCE_TIME, debounceOptions);
+  const publishLeftMotorChange = debounce((...args) => this.commandsPublisher.publish(...args), DEBOUNCE_TIME, debounceOptions);
+  const publishRobotStatusUpdate = debounce((...args) => this.statusPublisher.publish(...args), DEBOUNCE_TIME, debounceOptions);
 
   this.robot.on(ROBOT_EVENTS.CHANGED_RIGHT_MOTOR_SPEED, params => {
     const data = {...params, motor: MOTOR_NAMES.RIGHT};
     publishRightMotorChange({channel, message, data});
+    publishRobotStatusUpdate(this.robot.toJSON());
   });
 
   this.robot.on(ROBOT_EVENTS.CHANGED_LEFT_MOTOR_SPEED, params => {
     const data = {...params, motor: MOTOR_NAMES.LEFT};
     publishLeftMotorChange({channel, message, data});
+    publishRobotStatusUpdate(this.robot.toJSON());
   });
 }
 

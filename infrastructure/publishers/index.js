@@ -1,4 +1,5 @@
 module.exports = {
   ConsolePublisher: require('./console'),
-  PubnubPublisher: require('./pubnub')
+  PubnubPublisher: require('./pubnub'),
+  SocketIOPublisher: require('./socket-io')
 };

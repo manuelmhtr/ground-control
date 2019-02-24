@@ -1,4 +1,4 @@
-const {ConsolePublisher, PubnubPublisher} = require('./infrastructure/publishers');
+const {ConsolePublisher, PubnubPublisher, SocketIOPublisher} = require('./infrastructure/publishers');
 const {KeyboardInputHandler, PS3ControllerInputHandler} = require('./infrastructure/input-handlers');
 const Publisher = require('./app/publisher');
 const InputHandler = require('./app/input-handler');
@@ -6,12 +6,14 @@ const GroundRobotController = require('./controllers/ground-robot');
 const {GroundV1Robot} = require('./entities/robots');
 
 function lauchGroundControl() {
-  const publisher = getPublisher();
+  const commandsPublisher = getCommandsPublisher();
+  const statusPublisher = getStatusPublisher();
   const inputHandler = getInputHandler();
   const robot = getRobot();
   const controller = new GroundRobotController({
     robot,
-    publisher,
+    commandsPublisher,
+    statusPublisher,
     inputHandler
   });
   controller.start();
@@ -24,10 +26,17 @@ function getRobot() {
   });
 }
 
-function getPublisher() {
+function getCommandsPublisher() {
   const publishers = [
     new ConsolePublisher(),
     new PubnubPublisher()
+  ];
+  return new Publisher({publishers});
+}
+
+function getStatusPublisher() {
+  const publishers = [
+    new SocketIOPublisher()
   ];
   return new Publisher({publishers});
 }

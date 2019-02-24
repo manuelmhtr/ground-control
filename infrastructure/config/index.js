@@ -1,5 +1,11 @@
 const {parsed: data} = require('./load');
 
+const getServerConfig = () => {
+  return {
+    port: data.SERVER_PORT
+  };
+};
+
 const getPubnubConfig = () => {
   return {
     subscribeKey: data.PUBNUB_SUBSCRIBE_KEY,
@@ -10,5 +16,6 @@ const getPubnubConfig = () => {
 };
 
 module.exports = {
+  getServerConfig,
   getPubnubConfig
 };
