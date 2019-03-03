@@ -1,5 +1,5 @@
 const assert = require('assert');
-const {debounce} = require('lodash');
+const {debounce, camelCase, isObject} = require('lodash');
 
 const INPUT_COMMANDS = require('../entities/commands/input');
 const REMOTE_COMMANDS = require('../entities/commands/remote');
@@ -14,23 +14,27 @@ class GroundRobotController {
       robot,
       commandsPublisher,
       statusPublisher,
+      statusListener,
       inputHandler
     } = params;
 
     assert(robot, 'robot is required');
     assert(commandsPublisher, 'commandsPublisher is required');
     assert(statusPublisher, 'statusPublisher is required');
+    assert(statusListener, 'statusListener is required');
     assert(inputHandler, 'inputHandler is required');
 
     this.robot = robot;
     this.commandsPublisher = commandsPublisher;
     this.statusPublisher = statusPublisher;
+    this.statusListener = statusListener;
     this.inputHandler = inputHandler;
   }
 
   start() {
     bindInputHandlerEvents.call(this);
     bindRobotEvents.call(this);
+    bindStatusUpdates.call(this);
   }
 }
 
@@ -51,25 +55,41 @@ function bindInputHandlerEvents() {
 }
 
 function bindRobotEvents() {
-  const channel = this.robot.id;
+  const channel = `${this.robot.id}:commands`;
   const message = REMOTE_COMMANDS.SET_SPEED;
   const debounceOptions = { maxWait: MAX_DEBOUNCE_WAIT };
 
   const publishRightMotorChange = debounce((...args) => this.commandsPublisher.publish(...args), DEBOUNCE_TIME, debounceOptions);
   const publishLeftMotorChange = debounce((...args) => this.commandsPublisher.publish(...args), DEBOUNCE_TIME, debounceOptions);
-  const publishRobotStatusUpdate = debounce((...args) => this.statusPublisher.publish(...args), DEBOUNCE_TIME, debounceOptions);
 
   this.robot.on(ROBOT_EVENTS.CHANGED_RIGHT_MOTOR_SPEED, params => {
     const data = {...params, motor: MOTOR_NAMES.RIGHT};
     publishRightMotorChange({channel, message, data});
-    publishRobotStatusUpdate(this.robot.toJSON());
   });
 
   this.robot.on(ROBOT_EVENTS.CHANGED_LEFT_MOTOR_SPEED, params => {
     const data = {...params, motor: MOTOR_NAMES.LEFT};
     publishLeftMotorChange({channel, message, data});
-    publishRobotStatusUpdate(this.robot.toJSON());
   });
+}
+
+function bindStatusUpdates() {
+  const channel = `${this.robot.id}:status`;
+  this.statusListener.onUpdate(data => {
+    this.statusPublisher.publish(parseRobotStatus(data));
+  });
+  this.statusListener.subscribe(channel);
+}
+
+function parseRobotStatus(status) {
+  return camelizeObject(status);
+}
+
+function camelizeObject(obj) {
+  return Object.keys(obj).reduce((response, key) => {
+    const value = isObject(obj[key]) ? camelizeObject(obj[key]) : obj[key];
+    return { ...response, [camelCase(key)]: value };
+  }, {})
 }
 
 module.exports = GroundRobotController;

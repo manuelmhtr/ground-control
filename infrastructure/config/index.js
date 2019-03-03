@@ -6,6 +6,10 @@ const getServerConfig = () => {
   };
 };
 
+const getRobotId = () => {
+  return data.ROBOT_ID;
+};
+
 const getPubnubConfig = () => {
   return {
     subscribeKey: data.PUBNUB_SUBSCRIBE_KEY,
@@ -16,6 +20,7 @@ const getPubnubConfig = () => {
 };
 
 module.exports = {
+  getRobotId,
   getServerConfig,
   getPubnubConfig
 };
