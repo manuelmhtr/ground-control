@@ -14,7 +14,7 @@ const START_MARGIN = 10;
 const MID_HIGH = INPUT_MIDDLE + START_MARGIN;
 const MID_LOW = INPUT_MIDDLE - START_MARGIN;
 const MAX_SPEED = 50;
-const MAX_TURN = 100;
+const MAX_TURN = 50;
 const STOP_STATUS = { speed: 0, turn: 0 };
 
 class PS3ControllerInputHandler {
@@ -24,6 +24,7 @@ class PS3ControllerInputHandler {
     if (!this.device) return console.error('PS3 controller not connected');
     this.controller = new HID.HID(this.device.path);
     this.status = STOP_STATUS;
+    this.buttonsPressed = {};
     this.__launchHandler();
   }
 
@@ -34,7 +35,11 @@ class PS3ControllerInputHandler {
 
   __launchHandler() {
     this.controller.on('data', (data) => {
-      if (data[X_BUTTON_BYTE]) return this.__triggerStop();
+      if (data[X_BUTTON_BYTE] && !this.buttonsPressed[X_BUTTON_BYTE]) {
+        this.buttonsPressed[X_BUTTON_BYTE] = true;
+        return this.__triggerStop();
+      }
+      if (data[X_BUTTON_BYTE] === 0) this.buttonsPressed[X_BUTTON_BYTE] = false;
       const speedValue = normalizeSpeed(data[LEFT_STICK_BYTE]);
       const leftValue = normalizeTurn(data[LEFT_TRIGGER_BYTE]);
       const rightValue = normalizeTurn(data[RIGHT_TRIGGER_BYTE]);
@@ -63,7 +68,7 @@ class PS3ControllerInputHandler {
     console.log(newStatus, setImmediately);
     this.status.turn = newStatus.turn;
     this.status.speed = newStatus.speed;
-    const event = setImmediately ? INPUT_COMMANDS.SET_STATUS_IMMEDIATELY : INPUT_COMMANDS.SET_STATUS;
+    const event = setImmediately ? INPUT_COMMANDS.SET_DRIVE_IMMEDIATELY : INPUT_COMMANDS.SET_DRIVE;
     this.__emitEvent(event, this.status);
   }
 

@@ -40,16 +40,17 @@ class GroundRobotController {
 
 function bindInputHandlerEvents() {
   const channel = `${this.robot.id}:commands`;
-  const message = REMOTE_COMMANDS.SET_SPEED;
   const debounceOptions = { maxWait: MAX_DEBOUNCE_WAIT };
 
   const publishStatus = debounce((...args) => this.commandsPublisher.publish(...args), DEBOUNCE_TIME, debounceOptions);
 
-  this.inputHandler.on(INPUT_COMMANDS.SET_STATUS, data => {
+  this.inputHandler.on(INPUT_COMMANDS.SET_DRIVE, data => {
+    const message = REMOTE_COMMANDS.SET_DRIVE;
     publishStatus({channel, message, data});
   });
 
-  this.inputHandler.on(INPUT_COMMANDS.SET_STATUS_IMMEDIATELY, data => {
+  this.inputHandler.on(INPUT_COMMANDS.SET_DRIVE_IMMEDIATELY, data => {
+    const message = REMOTE_COMMANDS.SET_DRIVE;
     publishStatus.cancel();
     this.commandsPublisher.publish({channel, message, data});
   });
