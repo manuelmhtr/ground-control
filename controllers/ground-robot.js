@@ -6,7 +6,7 @@ const REMOTE_COMMANDS = require('../entities/commands/remote');
 const ROBOT_EVENTS = require('../entities/events/robot');
 const MOTOR_NAMES = require('../entities/enums/motor-names');
 const DEBOUNCE_TIME = 100;
-const MAX_DEBOUNCE_WAIT = 500;
+const MAX_DEBOUNCE_WAIT = 300;
 
 class GroundRobotController {
   constructor(params = {}) {
@@ -39,18 +39,19 @@ class GroundRobotController {
 }
 
 function bindInputHandlerEvents() {
-  this.inputHandler.on(INPUT_COMMANDS.INCREMENT_SPEED, ({motor, increment}) => {
-    if (motor === 'right') this.robot.rightMotor.incrementSpeed(increment);
-    if (motor === 'left') this.robot.leftMotor.incrementSpeed(increment);
+  const channel = `${this.robot.id}:commands`;
+  const message = REMOTE_COMMANDS.SET_SPEED;
+  const debounceOptions = { maxWait: MAX_DEBOUNCE_WAIT };
+
+  const publishStatus = debounce((...args) => this.commandsPublisher.publish(...args), DEBOUNCE_TIME, debounceOptions);
+
+  this.inputHandler.on(INPUT_COMMANDS.SET_STATUS, data => {
+    publishStatus({channel, message, data});
   });
 
-  this.inputHandler.on(INPUT_COMMANDS.SET_SPEED, ({motor, speed}) => {
-    if (motor === 'right') this.robot.rightMotor.setSpeed(speed);
-    if (motor === 'left') this.robot.leftMotor.setSpeed(speed);
-  });
-
-  this.inputHandler.on(INPUT_COMMANDS.STOP, () => {
-    this.robot.stop();
+  this.inputHandler.on(INPUT_COMMANDS.SET_STATUS_IMMEDIATELY, data => {
+    publishStatus.cancel();
+    this.commandsPublisher.publish({channel, message, data});
   });
 }
 
@@ -89,7 +90,7 @@ function camelizeObject(obj) {
   return Object.keys(obj).reduce((response, key) => {
     const value = isObject(obj[key]) ? camelizeObject(obj[key]) : obj[key];
     return { ...response, [camelCase(key)]: value };
-  }, {})
+  }, {});
 }
 
 module.exports = GroundRobotController;
